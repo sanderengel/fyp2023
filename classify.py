@@ -5,7 +5,7 @@
 
 import pickle as pk
 import os
-from code.extract_features import extract_features
+from code_.extract_features import extract_features
 from skimage.transform import resize
 
 def classify(img, mask):
