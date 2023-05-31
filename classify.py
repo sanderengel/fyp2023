@@ -4,7 +4,8 @@
 ### 2. call classify function on the new image(s) and its/their mask(s)
 
 import pickle as pk
-from code.model import extract_features, apply_pca, apply_feature_selector
+import os
+from code.extract_features import extract_features
 from skimage.transform import resize
 
 def classify(img, mask):
@@ -24,11 +25,17 @@ def classify(img, mask):
 
     X = extract_features(img, mask)
 
-    X_transformed = apply_pca(X)
+    # Apply PCA
+    pca = pk.load(open('pca.pkl', 'rb'))
+    X_normalized = (X - X.mean()) / X.std()
+    X_transformed = pca.transform(X_normalized)
 
-    X_transformed = apply_feature_selector(X)
+    # Apply feature selector
+    feature_selector = pk.load(open('selector.pkl', 'rb'))
+    X_transformed = feature_selector.transform(X)
 
-    classifier = pk.load(open('classifier.pkl', 'rb'))
+    # Imports classifier
+    classifier = pk.load(open('code' + os.sep + 'classifier.pkl', 'rb'))
 
     pred_label = classifier.predict(X_transformed)
     pred_prob = classifier.predict_proba(X_transformed)
