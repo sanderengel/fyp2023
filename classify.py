@@ -4,9 +4,13 @@
 ### 2. call classify function on the new image(s) and its/their mask(s)
 
 import pickle as pk
+import pandas as pd
 import os
-from code_.extract_features import extract_features
 from skimage.transform import resize
+
+import sys
+sys.path.append("code")
+from extract_features import extract_features
 
 def classify(img, mask):
     '''Predict label and and probability for image and mask using trained 
@@ -21,17 +25,23 @@ def classify(img, mask):
         pred_prob (float): predicted probability
     '''
 
-    img = resize(img, (300, 300))
+    # Cut of any potential extra color channels
+    img = img[:, :, :3]
+    if len(mask.shape) == 3:
+        mask = mask[:, :, 0] # Some masks have more than 2 dimensions, which we slice off here
 
-    X = extract_features(img, mask)
+    img = resize(img, (300, 300))
+    mask = resize(mask, (300, 300))
+
+    X = pd.DataFrame(extract_features(img, mask))
 
     # Apply PCA
-    pca = pk.load(open('pca.pkl', 'rb'))
+    pca = pk.load(open('code' + os.sep + 'pca.pkl', 'rb'))
     X_normalized = (X - X.mean()) / X.std()
     X_transformed = pca.transform(X_normalized)
 
     # Apply feature selector
-    feature_selector = pk.load(open('selector.pkl', 'rb'))
+    feature_selector = pk.load(open('code' + os.sep + 'selector.pkl', 'rb'))
     X_transformed = feature_selector.transform(X)
 
     # Imports classifier

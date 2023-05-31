@@ -345,8 +345,6 @@ def plot_dominance_bar(r_and_c):
     labelbottom=False,
     labelleft=False)
 
-
-
 def get_relative_rgb_means(image, slic_segments):
     '''Get mean RGB values for each segment in a SLIC segmented image.
 

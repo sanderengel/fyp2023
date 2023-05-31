@@ -24,16 +24,15 @@ def prep_im_and_mask(im_id, im_dir_path, mask_dir_path, scalar = 1, output_shape
     '''
 
     # Read and resize image
-    im = plt.imread(im_dir_path + im_id)[:, :, :3] #Some images have fourth, empty color chanel which we slice of here
+    im = plt.imread(im_dir_path + im_id)[:, :, :3] # Some images have fourth, empty color chanel which we slice off here
     im = rescale(im, scalar, anti_aliasing=True, channel_axis = 2) 
     if output_shape != None and scalar == 1:
         im = resize(im, output_shape)
 
     #Read and resize mask segmentation
     mask = plt.imread(mask_dir_path + im_id[:-4] + "_mask.png")
-
     if len(mask.shape) == 3:
-        mask = mask[:,:,0]
+        mask = mask[:, :, 0] # Some masks have more than 2 dimensions, which we slice off here
 
     mask = rescale(mask, scalar, anti_aliasing=False)
     
@@ -94,9 +93,13 @@ def prep_mask(im_id, mask_dir_path = "", scalar = 1, output_shape = None):
 
     # Read and resize image
     if mask_dir_path == "":
-        mask = plt.imread(im_id) #Some images have fourth, empty color chanel which we slice of here
+        mask = plt.imread(im_id)
     else:
         mask = plt.imread(mask_dir_path + im_id[:-4] + "_mask.png")
+
+    if len(mask.shape) == 3:
+        mask = mask[:, :, 0] # Some masks have more than 2 dimensions, which we slice off here
+    
     mask = rescale(mask, scalar, anti_aliasing=False)
     if output_shape != None and scalar == 1:
         mask = resize(mask, output_shape)
