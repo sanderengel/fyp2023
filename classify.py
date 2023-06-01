@@ -75,4 +75,4 @@ def classify(img, mask):
         diagnoses = 'healthy'
 
     print(f'Predicted label is: {pred_label} ({diagnoses})')
-    print(f'Predicted probability of lesion being unhealthy is: {pred_prob}')
+    print(f'Predicted probability of lesion being unhealthy is: {round(pred_prob, 4)}')
