@@ -35,6 +35,7 @@ def classify(img, mask):
     if len(mask.shape) == 3:
         mask = mask[:, :, 0] # Some masks have more than 2 dimensions, which we slice off here
 
+    # Resize
     img = resize(img, (300, 300))
     mask = resize(mask, (300, 300))
 
@@ -43,14 +44,20 @@ def classify(img, mask):
     binary_mask[mask > .5] = 1
     mask = binary_mask.astype(int)
 
-    X = pd.DataFrame(extract_features(img, mask))
+    # Extract features into dataframe and add column names
+    X = pd.DataFrame(extract_features(img, mask)).T
+    X.columns = feature_names
+
+    # Apply scalar
+    scaler = pk.load(open('code' + os.sep + 'scaler.pkl', 'rb'))
+    X_scaled = scaler.transform(X)
 
     # Apply PCA
     pca = pk.load(open('code' + os.sep + 'pca.pkl', 'rb'))
-    X_normalized = (X - X.mean()) / X.std()
-    X_normalized = X_normalized.T
-    X_normalized.columns = feature_names
-    X_transformed = pca.transform(X_normalized) # Transpose dataframe to get features as columns
+    # X_normalized = (X - X.mean()) / X.std()
+    # X_normalized = X_normalized.T
+    # X_normalized.columns = feature_names
+    X_transformed = pca.transform(X_scaled) # Transpose dataframe to get features as columns
 
     # Apply feature selector
     feature_selector = pk.load(open('code' + os.sep + 'selector.pkl', 'rb'))
@@ -60,6 +67,12 @@ def classify(img, mask):
     classifier = pk.load(open('code' + os.sep + 'classifier.pkl', 'rb'))
 
     pred_label = classifier.predict(X_transformed)[0]
-    pred_prob = classifier.predict_proba(X_transformed)[0]
+    pred_prob = classifier.predict_proba(X_transformed)[0][1]
 
-    return pred_label, pred_prob
+    if pred_label:
+        diagnoses = 'unhealthy'
+    else:
+        diagnoses = 'healthy'
+
+    print(f'Predicted label is: {pred_label} ({diagnoses})')
+    print(f'Predicted probability of lesion being unhealthy is: {pred_prob}')
