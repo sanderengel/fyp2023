@@ -1,7 +1,13 @@
-### FUNCTION THAT CLASSIFIES NEW IMAGES 
-### TO USE: 
-### 1. from classify import classify
-### 2. call classify function on the new image and its mask
+### Main classification function used to classify new images.
+
+### To use as import: 
+### 1. From classify import classify
+### 2. Call classify function on the new image and its mask
+
+### To run as script (e.g., directly from terminal):
+### 1. Run classify.py
+### 2. Input image id (excluding ticks)
+### 3. Input mask id (excluding ticks)
 
 import pickle as pk
 import pandas as pd
@@ -11,7 +17,7 @@ from skimage.transform import resize
 
 import sys
 sys.path.append("code")
-from extract_features import extract_features
+from model import extract_features
 
 feature_names = ['mean_assymmetry', 'best_asymmetry', 'worst_asymmetry', 'red_var', 'green_var', \
      'blue_var', 'hue_var', 'sat_var', 'val_var', 'dom_hue', 'dom_sat', 'dom_val', \
@@ -45,7 +51,7 @@ def classify(img, mask):
     mask = binary_mask.astype(int)
 
     # Extract features into dataframe and add column names
-    X = pd.DataFrame(extract_features(img, mask)).T
+    X = pd.DataFrame(extract_features(img, mask)).T # Transpose dataframe to get features as columns
     X.columns = feature_names
 
     # Apply scalar
@@ -54,10 +60,7 @@ def classify(img, mask):
 
     # Apply PCA
     pca = pk.load(open('code' + os.sep + 'pca.pkl', 'rb'))
-    # X_normalized = (X - X.mean()) / X.std()
-    # X_normalized = X_normalized.T
-    # X_normalized.columns = feature_names
-    X_transformed = pca.transform(X_scaled) # Transpose dataframe to get features as columns
+    X_transformed = pca.transform(X_scaled)
 
     # Apply feature selector
     feature_selector = pk.load(open('code' + os.sep + 'selector.pkl', 'rb'))
@@ -74,5 +77,21 @@ def classify(img, mask):
     else:
         diagnoses = 'healthy'
 
-    print(f'Predicted label is: {pred_label} ({diagnoses})')
-    print(f'Predicted probability of lesion being unhealthy is: {round(pred_prob, 4)}')
+    print(f'Predicted label: {pred_label} ({diagnoses})')
+    print(f'Predicted probability of lesion being unhealthy: {round(pred_prob, 4)}')
+
+if __name__ == '__main__':
+
+    import matplotlib.pyplot as plt
+
+    print('\nPlease input image and mask file names (including file extensions, excluding ticks).\n')
+
+    im_id = input('Image file name: ')
+    mask_id = input('Mask file name: ')
+
+    print('\n')
+
+    im = plt.imread(im_id)
+    mask = plt.imread(mask_id)
+
+    classify(im, mask)
