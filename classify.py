@@ -1,16 +1,21 @@
 ### FUNCTION THAT CLASSIFIES NEW IMAGES 
 ### TO USE: 
 ### 1. from classify import classify
-### 2. call classify function on the new image(s) and its/their mask(s)
+### 2. call classify function on the new image and its mask
 
 import pickle as pk
 import pandas as pd
+import numpy as np
 import os
 from skimage.transform import resize
 
 import sys
 sys.path.append("code")
 from extract_features import extract_features
+
+feature_names = ['mean_assymmetry', 'best_asymmetry', 'worst_asymmetry', 'red_var', 'green_var', \
+     'blue_var', 'hue_var', 'sat_var', 'val_var', 'dom_hue', 'dom_sat', 'dom_val', \
+     'compactness', 'convexity', 'F1', 'F2', 'F3', 'F10', 'F11', 'F12']
 
 def classify(img, mask):
     '''Predict label and and probability for image and mask using trained 
@@ -33,23 +38,28 @@ def classify(img, mask):
     img = resize(img, (300, 300))
     mask = resize(mask, (300, 300))
 
+    # Assert mask is binary
+    binary_mask = np.zeros_like(mask)
+    binary_mask[mask > .5] = 1
+    mask = binary_mask.astype(int)
+
     X = pd.DataFrame(extract_features(img, mask))
 
     # Apply PCA
     pca = pk.load(open('code' + os.sep + 'pca.pkl', 'rb'))
     X_normalized = (X - X.mean()) / X.std()
-    X_transformed = pca.transform(X_normalized)
+    X_normalized = X_normalized.T
+    X_normalized.columns = feature_names
+    X_transformed = pca.transform(X_normalized) # Transpose dataframe to get features as columns
 
     # Apply feature selector
     feature_selector = pk.load(open('code' + os.sep + 'selector.pkl', 'rb'))
-    X_transformed = feature_selector.transform(X)
+    X_transformed = feature_selector.transform(X_transformed)
 
-    # Imports classifier
+    # Import classifier
     classifier = pk.load(open('code' + os.sep + 'classifier.pkl', 'rb'))
 
-    pred_label = classifier.predict(X_transformed)
-    pred_prob = classifier.predict_proba(X_transformed)
+    pred_label = classifier.predict(X_transformed)[0]
+    pred_prob = classifier.predict_proba(X_transformed)[0]
 
     return pred_label, pred_prob
-
-
