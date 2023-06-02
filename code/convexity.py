@@ -1,4 +1,4 @@
-### Convexity module. Computes convexity score based on convex hull
+### Convexity module. Computes convexity score based on convex hull.
 
 ###############
 ### IMPORTS ###

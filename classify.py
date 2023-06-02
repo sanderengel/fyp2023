@@ -4,7 +4,7 @@
 ### 1. From classify import classify
 ### 2. Call classify function on the new image and its mask
 
-### To run as script (e.g., directly from terminal):
+### To run as script:
 ### 1. Run classify.py
 ### 2. Input image id (excluding ticks)
 ### 3. Input mask id (excluding ticks)
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
 
-    print('\nPlease input image and mask file names (including file extensions, excluding ticks).\n')
+    print('\nInput image and mask file names (including file extensions, excluding ticks).\n')
 
     im_id = input('Image file name: ')
     mask_id = input('Mask file name: ')

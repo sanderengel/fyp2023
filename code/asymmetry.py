@@ -138,7 +138,7 @@ def mean_asymmetry(mask, rotations = 30):
     
     Args:
         mask (numpy.ndarray): mask to compute asymmetry score for
-        rotations (int, optional): amount of rotations (defualt 30)
+        rotations (int, optional): amount of rotations (default 30)
 
     Returns:
         mean_score (float): mean asymmetry score.
@@ -153,7 +153,11 @@ def mean_asymmetry(mask, rotations = 30):
 ################
 
 def plot_midpoint(mask):
-    '''Cut mask and plot midpoint.'''
+    '''Cut mask and plot midpoint.
+
+    Args: mask (numpy.ndarray): input mask
+
+    '''
     cutted_mask = cut_mask(mask)
     y, x = midpoint(cutted_mask)
     plt.imshow(cutted_mask, cmap="gray")
@@ -161,6 +165,11 @@ def plot_midpoint(mask):
     plt.axhline(y = y, color = "r")
 
 def plot_asymmetry(mask, rotations = 90):
-    '''Plot asymmetry scores for each degree in 90/rotations steps.'''
+    '''Plot asymmetry scores for each degree in 90/rotations steps.
+
+    Args: mask (numpy.ndarray): input mask
+    rotations (int, optional): amount of rotations (default 90)
+    
+    '''
     asymmetry_scores = rotation_asymmetry(mask, rotations)
     plt.scatter(asymmetry_scores.keys(), asymmetry_scores.values())

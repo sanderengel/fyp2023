@@ -320,7 +320,10 @@ def color_dominance(image, mask, clusters = 5, include_ratios = False):
 
 def plot_dominance_bar(r_and_c):
     '''Plot dominance bar from percentage and count list.
-    Necessitates percentages in input.'''
+    Necessitates percentages in input.
+    
+    Args r_and_c: a list of tuples, each containing the percentage and RGB array of the dominent color
+    '''
 
     bar = np.ones((50, 500, 3), dtype='float32')
     plt.figure(figsize=(12,8))
@@ -344,6 +347,8 @@ def plot_dominance_bar(r_and_c):
     left=False,
     labelbottom=False,
     labelleft=False)
+
+
 
 def get_relative_rgb_means(image, slic_segments):
     '''Get mean RGB values for each segment in a SLIC segmented image.

@@ -128,6 +128,68 @@ def ProcessImages(file_data, image_folder, mask_folder, file_features, feature_n
 	# Save feature data as csv file
 	df_features.to_csv(file_features, index = False)
 
+###########
+### PCA ###
+###########
+
+def train_scaler(X):
+	'''Train the standardizing scaler. Save the result.
+	
+	Args:
+		X (pandas.DataFrame): Data Frame of features.
+	'''
+
+	std_scl = StandardScaler().set_output(transform='pandas')
+	std_scl.fit_transform(X)
+
+	pk.dump(std_scl, open('scaler.pkl', 'wb'))	
+
+# Standardize feature data
+def apply_scalar(X):
+	'''Standardize the input.
+
+    Args:
+        X (pandas.DataFrame): Data Frame of features.
+
+    Returns:
+        X_std (pandas.DataFrame): Array containg standardized features.    
+    '''
+
+	scaler = pk.load(open('scaler.pkl', 'rb'))
+	X_scaled = scaler.transform(X)
+
+	return X_scaled
+
+def train_pca(X, n=0.95):
+	'''Train PCA. Save the result.
+
+	Args:
+	    X (pandas.DataFrame): Data Frame of features.
+	    n (float): Percentage of variation that should be explained by the chosen features.
+	'''
+
+	# X_normalized = (X - X.mean()) / X.std()
+	pca = PCA(n_components=n)
+	pca.fit_transform(X)
+
+	pk.dump(pca, open('pca.pkl', 'wb'))
+
+def apply_pca(X):
+	'''Apply pca to X.
+
+	Args:
+	    X (pandas.DataFrame): Data Frame of features.
+	    n (float): Percentage of variation that should be explained by the chosen features.
+
+	Returns:
+	    X_std_pca (numpy.ndarray): Array containg transformed, standardized features.    
+	'''
+
+	pca = pk.load(open('pca.pkl', 'rb'))
+	X_transformed = pca.transform(X)
+
+	return X_transformed
+
 #########################
 ### FEATURE SELECTION ###
 #########################
@@ -170,85 +232,32 @@ def apply_feature_selector(X):
 	return X_transformed
 
 def feature_scores(feature_selector):
-    '''Using SelectKBest to extract features from train_X, down to k features as output
-    Returns a selector object (which is applied to X_train and X_test afterwards) 
-	and the score for each feature.
-
-    Args:
-        train_X (pandas.DataFrame): Data Frame of features from X_train.
-		train_y (pandas.DataFrame): Data Frame of target values from y_train.
-        k (int): Number of features to output.
-
-    Returns:
-		feature_selector (selector object): 
-        scores (numpy.ndarray): Array containg scores for each feature.    
-    '''
+    '''Get feature scores from feature selector.'''
     
     scores = feature_selector.scores_
     
     return scores
 
-###########
-### PCA ###
-###########
-
-def train_scaler(X):
-
-	std_scl = StandardScaler().set_output(transform='pandas')
-	std_scl.fit_transform(X)
-
-	pk.dump(std_scl, open('scaler.pkl', 'wb'))	
-
-# Standardize feature data
-def apply_scalar(X):
-	'''Standardized the input.
-
-    Args:
-        X (pandas.DataFrame): Data Frame of features.
-
-    Returns:
-        X_std (numpy.ndarray): Array containg standardized features.    
-    '''
-
-	scaler = pk.load(open('scaler.pkl', 'rb'))
-	X_scaled = scaler.transform(X)
-
-	return X_scaled
-
-def train_pca(X, n=0.95):
-	'''Train PCA. Save the result.
-
-	Args:
-	    X (pandas.DataFrame): Data Frame of features.
-	    n (float): Percentage of variation that should be explained by the chosen features.
-
-	'''
-
-	# X_normalized = (X - X.mean()) / X.std()
-	pca = PCA(n_components=n)
-	pca.fit_transform(X)
-
-	pk.dump(pca, open('pca.pkl', 'wb'))
-
-def apply_pca(X):
-	'''Apply pca to X.
-
-	Args:
-	    X (pandas.DataFrame): Data Frame of features.
-	    n (float): Percentage of variation that should be explained by the chosen features.
-
-	Returns:
-	    X_std_pca (numpy.ndarray): Array containg transformed, standardized features.    
-	'''
-
-	pca = pk.load(open('pca.pkl', 'rb'))
-	X_transformed = pca.transform(X)
-
-	return X_transformed
-
 ########################
 ### TRAIN CLASSIFIER ###
 ########################
+
+def train_clf(X_train, y_train, classifiers):
+	'''
+    Train multiple classifiers on the input training data.
+
+    Args:
+        X_train (array-like): Input feature matrix or dataset for training.
+        y_train (array-like): Target variable or labels for training.
+        classifiers (list): List of classifier objects to be trained.
+
+    Returns:
+        list: List of trained classifier objects.
+    '''
+
+	trained_classifiers = [classifier.fit(X_train, y_train) for classifier in classifiers]
+
+	return trained_classifiers
 
 def cross_validate_clf(X, y, classifiers, groups):
 	'''Perform cross-validation for multiple classifiers on the input data.
@@ -265,7 +274,11 @@ def cross_validate_clf(X, y, classifiers, groups):
 	'''
 
 	# Scores for evaluation
-	scores ={'accuracy': make_scorer(accuracy_score), 'sensitivity': make_scorer(recall_score), 'specificity': make_scorer(recall_score, pos_label=0), 'precision': make_scorer(precision_score), 'roc_auc': make_scorer(roc_auc_score, needs_proba=True)}
+	scores ={'accuracy': make_scorer(accuracy_score), 
+	  'sensitivity': make_scorer(recall_score), 
+	  'specificity': make_scorer(recall_score, pos_label=0), 
+	  'precision': make_scorer(precision_score), 
+	  'roc_auc': make_scorer(roc_auc_score, needs_proba=True)}
 
 	num_folds = 5
 	cross_val = StratifiedGroupKFold(n_splits= num_folds)	
@@ -293,39 +306,6 @@ def cross_validate_clf(X, y, classifiers, groups):
 
 	return evaluation_results
 
-def print_results_cv(evaluation_results):
-	'''Print the evaluation results for cross-validated classifiers.
-
-    Args:
-        evaluation_results (dict): Dictionary containing evaluation results for each classifier.
-
-    '''
-
-	for classifier, scores in evaluation_results.items():
-		print(classifier)
-		for metric, score in scores.items():
-			print(f'{metric}: {score:.4f}')
-	    
-		print()
-
-def train_clf(X_train, y_train, classifiers):
-	'''
-    Train multiple classifiers on the input training data.
-
-    Args:
-        X_train (array-like): Input feature matrix or dataset for training.
-        y_train (array-like): Target variable or labels for training.
-        classifiers (list): List of classifier objects to be trained.
-
-    Returns:
-        list: List of trained classifier objects.
-
-    '''
-
-	trained_classifiers = [classifier.fit(X_train, y_train) for classifier in classifiers]
-
-	return trained_classifiers
-
 def evaluate_clf(X_test, y_test, trained_classifiers):
 	'''
     Evaluate the performance of trained classifiers on the test data.
@@ -338,8 +318,8 @@ def evaluate_clf(X_test, y_test, trained_classifiers):
     Returns:
         dict: Dictionary containing evaluation results for each classifier, with metrics such as Accuracy, Sensitivity,
               Specificity, Precision, and AUC ROC.
-
     '''
+    
 	# Take trained classifiers as inputs
 	results = {}
 	for clf in trained_classifiers:
@@ -369,9 +349,22 @@ def print_results(results):
 
     Args:
         results (dict): Dictionary containing evaluation results for each classifier.
-
     '''
 	for classifier, scores in results.items():
+		print(classifier)
+		for metric, score in scores.items():
+			print(f'{metric}: {score:.4f}')
+	    
+		print()
+
+def print_results_cv(evaluation_results):
+	'''Print the evaluation results for cross-validated classifiers.
+
+    Args:
+        evaluation_results (dict): Dictionary containing evaluation results for each classifier.
+    '''
+
+	for classifier, scores in evaluation_results.items():
 		print(classifier)
 		for metric, score in scores.items():
 			print(f'{metric}: {score:.4f}')
