@@ -18,19 +18,19 @@ This is a finished repository. Re-training models (using previously extracted im
 
 ### Authors
 
-Christian Sneftrup Fleischer
+Christian Sneftrup Fleischer  
 chfl@itu.dk
 
-Hugo Lysdahl Hoydal
+Hugo Lysdahl Hoydal  
 huly@itu.dk
 
-Ida Ugilt Wennergaard
+Ida Ugilt Wennergaard  
 idwe@itu.dk
 
-Julie Langeland Hagen
+Julie Langeland Hagen  
 jhag@itu.dk
 
-Sander Engel Thilo
+Sander Engel Thilo  
 saet@itu.dk
 
 
