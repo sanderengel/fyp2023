@@ -73,9 +73,9 @@ def classify(img, mask):
     pred_prob = classifier.predict_proba(X_transformed)[0][1]
 
     if pred_label:
-        diagnoses = 'unhealthy'
+        diagnoses = 'cancerous'
     else:
-        diagnoses = 'healthy'
+        diagnoses = 'not cancerous'
 
     print(f'Predicted label: {pred_label} ({diagnoses})')
     print(f'Predicted probability of lesion being unhealthy: {round(pred_prob, 4)}')
