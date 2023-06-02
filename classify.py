@@ -78,7 +78,7 @@ def classify(img, mask):
         diagnoses = 'not cancerous'
 
     print(f'Predicted label: {pred_label} ({diagnoses})')
-    print(f'Predicted probability of lesion being unhealthy: {round(pred_prob, 4)}')
+    print(f'Predicted probability of lesion being cancerous: {round(pred_prob, 4)}')
 
 if __name__ == '__main__':
 
