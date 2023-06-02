@@ -12,5 +12,26 @@ This is a finished repository. Re-training models (using previously extracted im
 * numpy
 * pandas
 * matplotlib
+* scipy
 * scikit-learn
 * scikit-image
+
+### Authors
+
+Christian Sneftrup Fleischer
+chfl@itu.dk
+
+Hugo Lysdahl Hoydal
+huly@itu.dk
+
+Ida Ugilt Wennergaard
+idwe@itu.dk
+
+Julie Langeland Hagen
+jhag@itu.dk
+
+Sander Engel Thilo
+saet@itu.dk
+
+
+
