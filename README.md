@@ -10,11 +10,13 @@ This is a finished repository. Re-training models (using previously extracted im
 
 **To run classify (mentioned version or newer):**
 
-* python 3
-* numpy 1.21.5
+* Python 3
+* any Jupyter Notebook interface
+  
+* NumPy 1.21.5
 * pandas 1.3.5
-* matplotlib 3.5.1
-* scipy 1.7.3
+* Matplotlib 3.5.1
+* SciPy 1.7.3
 * scikit-learn 1.2.2
 * scikit-image 0.19.2
 
@@ -29,8 +31,8 @@ This is a finished repository. Re-training models (using previously extracted im
 
 1. Run "import matplotlib.pyplot"
 2. Run "from classify import classify"
-3. Read image as numpy array using matplotlib.pyplot.imread('YOUR_IMAGE_ID.png')
-4. Read mask as numpy array using matplotlib.pyplot.imread('YOUR_MASK_ID.png')
+3. Read image as NumPy array using matplotlib.pyplot.imread('YOUR_IMAGE_ID.png')
+4. Read mask as NumPy array using matplotlib.pyplot.imread('YOUR_MASK_ID.png')
 5. Call classify function on the new image and its mask, e.g., classify(image, mask)
 
 **To run classify as python script:**
